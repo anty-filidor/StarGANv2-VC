@@ -1,14 +1,15 @@
 log_dir: "Models/VCTK20"
 save_freq: 2
 device: "cuda"
-epochs: 150
+epochs: 2
 batch_size: 5
 pretrained_model: ""
 load_only_params: false
 fp16_run: true
 
-train_data: "Data/train_list.txt"
-val_data: "Data/val_list.txt"
+data_stub: "/vctk-stargan"
+train_data: "train_list.txt"
+val_data: "val_list.txt"
 
 F0_path: "Utils/JDC/bst.t7"
 ASR_config: "Utils/ASR/config.yml"

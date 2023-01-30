@@ -1,0 +1,7 @@
+{
+    "image": "mcz:stargan_env",
+    "runArgs": ["--gpus=all"],
+    "mounts": [
+        "source=${localWorkspaceFolder}/../vctk-stargan,target=/vctk-stargan,type=bind,consistency=cached"
+    ]
+}

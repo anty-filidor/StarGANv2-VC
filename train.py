@@ -5,6 +5,7 @@ import os
 import os.path as osp
 import re
 import sys
+from typing import List, Optional, Tuple
 import yaml
 import shutil
 import numpy as np
@@ -27,6 +28,8 @@ from Utils.JDC.model import JDCNet
 
 import logging
 from logging import StreamHandler
+from pathlib import Path
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = StreamHandler()
@@ -56,13 +59,14 @@ def main(config_path):
     device = config.get('device', 'cpu')
     epochs = config.get('epochs', 1000)
     save_freq = config.get('save_freq', 20)
+    data_stub = config.get('data_stub', ".")
     train_path = config.get('train_data', None)
     val_path = config.get('val_data', None)
     stage = config.get('stage', 'star')
     fp16_run = config.get('fp16_run', False)
     
     # load data
-    train_list, val_list = get_data_path_list(train_path, val_path)
+    train_list, val_list = get_data_path_list(data_stub, train_path, val_path)
     train_dataloader = build_dataloader(train_list,
                                         batch_size=batch_size,
                                         num_workers=4,
@@ -139,18 +143,31 @@ def main(config_path):
 
     return 0
 
-def get_data_path_list(train_path=None, val_path=None):
+def get_data_path_list(
+    data_stub: str, train_path: Optional[str]=None, val_path: Optional[str]=None
+) -> Tuple[List[str], List[str]]:
+    """Read lines from files with listing of data for training."""
+    data_stub_path = Path(data_stub)
     if train_path is None:
         train_path = "Data/train_list.txt"
     if val_path is None:
         val_path = "Data/val_list.txt"
 
-    with open(train_path, 'r') as f:
+    train_full_path = data_stub_path.joinpath(train_path)
+    with open(str(train_full_path), 'r') as f:
         train_list = f.readlines()
-    with open(val_path, 'r') as f:
-        val_list = f.readlines()
+    train_list_absolute = [
+        str(data_stub_path.joinpath(rel_path)) for rel_path in train_list
+    ]
 
-    return train_list, val_list
+    val_full_path = data_stub_path.joinpath(val_path)
+    with open(str(val_full_path), 'r') as f:
+        val_list = f.readlines()
+    val_list_absolute = [
+        str(data_stub_path.joinpath(rel_path)) for rel_path in val_list
+    ]
+
+    return train_list_absolute, val_list_absolute
 
 if __name__=="__main__":
     main()

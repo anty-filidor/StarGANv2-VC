@@ -11,6 +11,7 @@ import numpy as np
 import soundfile as sf
 import torch.nn.functional as F
 
+from pathlib import Path
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -88,6 +89,8 @@ class MelDataset(torch.utils.data.Dataset):
 
     def _load_tensor(self, data):
         wave_path, label = data
+        if not Path(wave_path).exists():
+            raise ValueError(f"Invalid path to data: {wave_path}")
         label = int(label)
         wave, sr = sf.read(wave_path)
         wave_tensor = torch.from_numpy(wave).float()
